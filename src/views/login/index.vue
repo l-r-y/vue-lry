@@ -52,9 +52,9 @@ export default {
   methods: {
     reset () {
       // resetFields()表单重置方法
-      // this.$refs.form.resetFields()
-      // this.login.name = this.login.password = ''
-      console.log(this)
+      this.$refs.form.resetFields()
+      this.login.name = this.login.password = ''
+      // console.log(this)
     }
   }
 }
