@@ -9,23 +9,27 @@
       <!-- model绑定双向绑定 -->
       <!-- rulse绑定表单验证 -->
       <!-- ref 被用来给DOM元素或子组件注册引用信息。引用信息会根据父组件的 $refs 对象进行注册。如果在普通的DOM元素上使用，引用信息就是元素; 如果用在子组件上，引用信息就是组件实例
-注意：只要想要在Vue中直接操作DOM元素，就必须用ref属性进行注册-->
-      <el-form ref="form"  :model="login" :rules="rules" class="login">
+      注意：只要想要在Vue中直接操作DOM元素，就必须用ref属性进行注册-->
+      <el-form ref="formref" :model="login" :rules="rules" class="login">
         <!-- 用户名 -->
         <!-- prop使用表单验证 -->
-        <el-form-item prop="name">
+        <el-form-item prop="username">
           <!-- 属性方式: icon使用字体图标  prefix-icon在最前面使用 suffix-icon在最后面使用-->
-           <!-- slot 方式：   <i slot="suffix" class="el-input__icon el-icon-date"></i>-->
-          <el-input prefix-icon="iconfont icon-user" v-model="login.name" placeholder="请输入账号">
-          </el-input>
+          <!-- slot 方式：   <i slot="suffix" class="el-input__icon el-icon-date"></i>-->
+          <el-input prefix-icon="iconfont icon-user" v-model="login.username" placeholder="请输入账号"></el-input>
         </el-form-item>
         <!-- 密码 -->
         <el-form-item prop="password">
-          <el-input prefix-icon="iconfont icon-3702mima" v-model="login.password" type="password" placeholder="请输入密码"></el-input>
+          <el-input
+            prefix-icon="iconfont icon-3702mima"
+            v-model="login.password"
+            type="password"
+            placeholder="请输入密码"
+          ></el-input>
         </el-form-item>
         <el-form-item class="login-button">
-          <el-button type="primary">登录</el-button>
-          <el-button class="reset" @click='reset'>重置</el-button>
+          <el-button type="primary" @click="islogin">登录</el-button>
+          <el-button class="reset" @click="reset">重置</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -35,11 +39,11 @@
 export default {
   data: () => ({
     login: {
-      name: 'zs',
+      username: 'admin',
       password: '123456'
     },
     rules: {
-      name: [
+      username: [
         { required: true, message: '请输入登录名称', trigger: 'blur' },
         { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
       ],
@@ -50,11 +54,24 @@ export default {
     }
   }),
   methods: {
-    reset () {
+    reset() {
       // resetFields()表单重置方法
-      this.$refs.form.resetFields()
-      this.login.name = this.login.password = ''
-      // console.log(this)
+      this.$refs.formref.resetFields()
+      this.login.username = this.login.password = ''
+    },
+    islogin() {
+      this.$refs.formref.validate(async valid => {
+        if (!valid) return
+        console.log(this.login)
+        const {
+          data: { data, meta }
+        } = await this.$http.post('login', this.login)
+        console.log(meta)
+        if (meta.status !== 200) return console.log('登录失败')
+        console.log('登录成功')
+        sessionStorage.setItem('token', data.token)
+        this.$router.push('./home')
+      })
     }
   }
 }
