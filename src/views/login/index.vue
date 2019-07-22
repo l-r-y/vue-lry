@@ -62,13 +62,13 @@ export default {
     islogin() {
       this.$refs.formref.validate(async valid => {
         if (!valid) return
-        console.log(this.login)
+        // console.log(this.login)
         const {
           data: { data, meta }
         } = await this.$http.post('login', this.login)
-        console.log(meta)
-        if (meta.status !== 200) return console.log('登录失败')
-        console.log('登录成功')
+        // console.log(meta)
+        if (meta.status !== 200) return this.$message.error('登录失败')
+        this.$message.success('登录成功')
         sessionStorage.setItem('token', data.token)
         this.$router.push('./home')
       })

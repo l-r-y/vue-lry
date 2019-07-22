@@ -12,24 +12,35 @@
     <el-Container>
       <!-- 侧边栏区域 -->
       <el-aside :width="wid">
+        <!-- 控制侧边栏伸缩 -->
         <div class="aside-header" @click="getcollapse">|||</div>
         <el-menu
-          background-color="#545c64"
+          background-color="#333743"
           text-color="#fff"
-          active-text-color="#1c68f9"
+          :default-active="activepath"
+          active-text-color="#409Eff"
           unique-opened
           :collapse="iscollapse"
           :collapse-transition="false"
+          router
         >
+          <!-- unique-opened是否只保持一个子菜单的展开 -->
+          <!-- collapse控制侧边栏伸缩 -->
+          <!-- collapse-transition侧边栏伸缩动画 -->
+
+          <!-- 遍历数据渲染侧边栏列表 -->
+          <!-- 一级菜单 -->
           <el-submenu :index="item.id+''" v-for="item in menus" :key="item.id">
             <template slot="title">
               <i :class="iconObj[item.id]"></i>
               <span>{{item.authName}}</span>
             </template>
+            <!-- 二级菜单 -->
             <el-menu-item
-              :index="menuitem.id+''"
+              :index="'/'+menuitem.path"
               v-for="menuitem in item.children"
               :key="menuitem.id"
+              @click="saveNavState('/'+menuitem.path)"
             >
               <i class="el-icon-menu"></i>
               <span>{{menuitem.authName}}</span>
@@ -38,7 +49,10 @@
         </el-menu>
       </el-aside>
       <!-- 内容区域 -->
-      <el-main>Main</el-main>
+      <el-main>
+        <!-- 占位符 -->
+        <router-view></router-view>
+      </el-main>
     </el-Container>
   </el-Container>
 </template>
@@ -53,31 +67,40 @@ export default {
       '102': 'iconfont icon-danju',
       '145': 'iconfont icon-baobiao'
     },
-    iscollapse: false
+    iscollapse: false,
+    activepath: ''
   }),
   computed: {
-    wid () {
+    // 使用计算属性计算侧边栏的宽
+    wid() {
       return this.iscollapse ? '64px' : '200px'
     }
   },
   created() {
+    // 使用生命周期调用初始渲染函数
     this.getmenus()
+    this.activepath = sessionStorage.getItem('activepath')
   },
   methods: {
+    // 退出函数 点击删除本地储存跳转到登录页面
     logout() {
       sessionStorage.clear()
       this.$router.push('/login')
     },
+    // 初始渲染请求 使用es7方法
     async getmenus() {
       const {
         data: { data, meta }
       } = await this.$http.get('menus')
       if (meta.status !== 200) return this.$message.error(meta.msg)
       this.menus = data
-      console.log(this.menus)
+      // console.log(this.menus)
     },
     getcollapse() {
       this.iscollapse = !this.iscollapse
+    },
+    saveNavState(activepath) {
+      sessionStorage.setItem('activepath', activepath)
     }
   }
 }
@@ -102,9 +125,10 @@ export default {
       img {
         height: 80%;
         border-radius: 50%;
+        margin-left: 10px;
       }
       span {
-        margin-left: 15px;
+        margin: 15px;
       }
     }
   }
